@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiyun.mapper.NewsMapper">
+	<resultMap type="news" id="BaseMap">
+		<id column="nid" property="nid"/>
+		<result column="tid" property="tid"/>
+		<result column="title" property="title"/>
+		<result column="img" property="img"/>
+		<result column="content" property="content"/>
+		<result column="createtime" property="createtime"/>
+		<association property="topics" javaType="topics">
+			<id column="tid" property="tid"/>
+			<result column="topic" property="topic"/>
+		</association>
+	</resultMap>
+	<select id="findAll" resultMap="BaseMap">
+		SELECT * FROM news,topics 
+		<where>
+			 news.tid=topics.tid
+			 <if test="title!=null and title!=''">
+			 	and title like '%${title}%'
+			 </if>
+			 <if test="starttime!=null">
+			 	and news.createtime &gt;= #{starttime}
+			 </if>
+			 <if test="endtime!=null">
+			 	and news.createtime &lt;= #{endtime}
+			 </if>
+		</where>
+		
+	</select>
+	<select id="findById" resultType="news" parameterType="int">
+		select * from news where nid=#{nid}
+	</select>
+	<select id="findTopics" resultType="topics" parameterType="int">
+		select * from topics 
+	</select>
+	<update id="update" parameterType="news">
+		update news set tid=#{tid},title=#{title},img=#{img},
+		content=#{content},createtime=#{createtime} where nid=#{nid}
+	</update>
+	<delete id="deleteAll" parameterType="int">
+		delete from news 
+		<where>
+			<foreach collection="array"  item="nids" separator="or">
+				nid=#{nids}
+			</foreach>
+		</where>
+	</delete>
+	<insert id="add" parameterType="news">
+		insert into news(tid,title,img,content,createtime) 
+		values(#{tid},#{title},#{img},#{content},#{createtime})
+	</insert>
+</mapper>
